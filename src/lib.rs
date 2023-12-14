@@ -24,11 +24,6 @@ async fn handler(_headers: Vec<(String, String)>, qry: HashMap<String, Value>, b
         .unwrap()
         .as_str()
         .unwrap_or("my-book");
-    let question = qry
-        .get("ask")
-        .unwrap()
-        .as_str()
-        .unwrap_or("what's the gist of the book");
 
     let vector_size = qry.get("vector_size").unwrap().as_str().unwrap();
     let vector_size: u64 = vector_size.parse().unwrap_or(1536);
@@ -123,9 +118,11 @@ async fn handler(_headers: Vec<(String, String)>, qry: HashMap<String, Value>, b
         }
     }
     if qry.contains_key("ask") {
-        if let Some(res) = get_answer(question, &collection_name).await {
-            send_success(&res);
-        }
+        if let Ok(question) = String::from_utf8(body) {
+            if let Some(res) = get_answer(&question, &collection_name).await {
+                send_success(&res);
+            }
+        } 
     }
 }
 
